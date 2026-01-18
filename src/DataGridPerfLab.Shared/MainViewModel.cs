@@ -46,6 +46,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             BuildMode.ParallelConcurrentBag => BuildItemsParallelConcurrentBag(count),
             BuildMode.ParallelArray => BuildItemsParallelArray(count),
+            BuildMode.ParallelLockedList => BuildItemsParallelLockedList(count),
             _ => BuildItemsSequential(count),
         };
 
@@ -137,6 +138,60 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         // Already ordered by i
         return new List<Item>(arr);
+    }
+
+    /// <summary>
+    /// Parallel generation into a shared List&lt;T&gt; guarded by a lock.
+    /// On .NET 9+ we demonstrate System.Threading.Lock (EnterScope).
+    /// On older TFMs we fall back to lock(object).
+    /// </summary>
+    private static List<Item> BuildItemsParallelLockedList(int count)
+    {
+        var list = new List<Item>(capacity: count);
+
+        var rng = new ThreadLocal<Random>(() => new Random(Guid.NewGuid().GetHashCode()));
+
+#if NET9_0_OR_GREATER
+        var gate = new System.Threading.Lock();
+        System.Threading.Tasks.Parallel.For(0, count, i =>
+        {
+            var r = rng.Value!;
+            var item = new Item
+            {
+                Id = i,
+                Name = "Item " + i,
+                Score = r.Next(0, 100)
+            };
+
+            using (gate.EnterScope())
+            {
+                list.Add(item);
+            }
+        });
+#else
+        object gate = new();
+        System.Threading.Tasks.Parallel.For(0, count, i =>
+        {
+            var r = rng.Value!;
+            var item = new Item
+            {
+                Id = i,
+                Name = "Item " + i,
+                Score = r.Next(0, 100)
+            };
+
+            lock (gate)
+            {
+                list.Add(item);
+            }
+        });
+#endif
+
+        rng.Dispose();
+
+        // Stable UI order
+        list.Sort(static (a, b) => a.Id.CompareTo(b.Id));
+        return list;
     }
 
     /// <summary>

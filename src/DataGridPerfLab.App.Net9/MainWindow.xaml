@@ -48,6 +48,8 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <!--  Group: data build  -->
@@ -75,6 +77,7 @@
                                     <ComboBoxItem Content="逐次 (Sequential)" />
                                     <ComboBoxItem Content="並列 (ConcurrentBag)" />
                                     <ComboBoxItem Content="並列 (Array)" />
+                                    <ComboBoxItem Content="並列 (List+Lock)" />
                                 </ComboBox>
                             </StackPanel>
                         </StackPanel>
@@ -134,9 +137,26 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <!--  Group: DataGrid options  -->
+
+                    <!--  Group: theme (.NET 9+)  -->
                     <GroupBox
                         Grid.Column="4"
+                        Padding="10"
+                        Header="テーマ (.NET 9+)">
+                        <StackPanel>
+                            <CheckBox
+                                x:Name="FluentThemeToggle"
+                                Margin="0,0,0,0"
+                                Checked="OnThemeChanged"
+                                Content="Fluent Theme（ThemeMode=System）"
+                                IsChecked="False"
+                                Unchecked="OnThemeChanged" />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!--  Group: DataGrid options  -->
+                    <GroupBox
+                        Grid.Column="6"
                         Padding="10"
                         Header="DataGrid 表示">
                         <StackPanel>

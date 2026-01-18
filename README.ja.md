@@ -73,3 +73,31 @@ UI 更新を速くするというより、**UI に渡す前のデータ生成（
 - **並列 (Array)**: `Item[]` に index で書き込む方式（共有コレクションが無く、並列生成としては速いことが多い）
 
 ※ DataGrid の描画は UI スレッドが支配的なので、これは主に「生成コストの比較」です。UI 反映は ItemsSource 差し替えが基本です。
+
+---
+
+## .NET 6～10 固有の「比較ポイント」追加
+
+このラボに追加した “バージョン固有” の比較ポイントは次のとおりです。
+
+- **.NET 9+（WPF）: ThemeMode / Fluent Theme**
+  - `Window.ThemeMode` / `Application.ThemeMode` により、Fluent テーマを **ResourceDictionary を直接マージせず**に有効化できます。 citeturn3search1turn3search4
+- **.NET 9+（Runtime）: System.Threading.Lock**
+  - 従来の `lock(object)` の代替として `System.Threading.Lock` が追加されました。ラボでは「並列 (List+Lock)」で、.NET 9+ のときだけ `Lock.EnterScope()` を使う実装にしています。 citeturn3search0turn3search2turn3search12
+- **.NET 7（WPF）: 内部最適化の積み重ね**
+  - boxing/unboxing や割り当て削減など、WPF 全体でパフォーマンス改善が継続的に入りました（DataGridも恩恵を受けます）。 citeturn0search0turn0search7
+- **.NET 10（WPF）: UIA/ダイアログ/描画まわりの内部改善**
+  - UI Automation やファイルダイアログ、ピクセル変換など内部最適化が進んでいます。DataGrid 直接ではないですが、アプリ全体の “もっさり” を減らす方向の改善です。 citeturn0search3
+
+> 注: DataGrid の体感速度は **仮想化・ItemsSource差し替え・DeferRefresh** の影響が支配的です。  
+> バージョン差は「同じ実装でも少しずつ良くなる」枠として見るのが分かりやすいです。
+
+---
+
+### Preview API: ThemeMode（WPF0001 について）
+
+`.NET 9+` の **`Window.ThemeMode`** は WPF アナライザーで **WPF0001** が出ます。
+これは「評価目的（preview）API」で、将来変更/削除される可能性があることを示すものです。
+
+本ラボでは「.NET 9+ 固有の改善点を比較する」目的で使用しているため、
+該当箇所は **`#pragma warning disable WPF0001`** で明示的に抑制しています。

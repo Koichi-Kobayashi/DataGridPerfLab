@@ -74,3 +74,30 @@ For comparing data generation strategies (CPU work), you can switch between:
 - **Parallel (Array)**: writes into an indexed `Item[]` (often faster than concurrent collections)
 
 Note: DataGrid rendering is dominated by UI-thread work; this primarily compares generation cost.
+
+---
+
+## .NET 6–10 version-specific comparison points
+
+This lab includes a few intentionally **version-specific** switches you can compare across TFMs:
+
+- **.NET 9+ (WPF): ThemeMode / Fluent Theme**
+  - `Window.ThemeMode` / `Application.ThemeMode` lets you enable the Fluent theme without manually merging resource dictionaries. citeturn3search1turn3search4
+- **.NET 9+ (Runtime): System.Threading.Lock**
+  - .NET 9 introduces `System.Threading.Lock` as a modern synchronization primitive. The lab’s “Parallel (List+Lock)” build mode uses `Lock.EnterScope()` on .NET 9+ and falls back to `lock(object)` on older TFMs. citeturn3search2turn3search12
+- **.NET 7 (WPF): ongoing perf work**
+  - WPF in .NET 7 shipped with a broad set of performance improvements (allocations/boxing reductions, etc.). citeturn0search0turn0search7
+- **.NET 10 (WPF): internal perf improvements**
+  - WPF in .NET 10 mentions internal optimizations (UI automation, dialogs, pixel conversions, caches, etc.). citeturn0search3
+
+Note: DataGrid responsiveness is still dominated by **virtualization, ItemsSource replacement, and DeferRefresh**. Version upgrades tend to deliver incremental gains on top of correct usage patterns.
+
+---
+
+### Preview API: ThemeMode (WPF0001)
+
+On `.NET 9+`, **`Window.ThemeMode`** triggers analyzer warning **WPF0001**.
+This indicates it is an *evaluation/preview* API that may change or be removed in a future update.
+
+This lab uses it intentionally as a **.NET 9+ specific comparison point**,
+so the call site explicitly suppresses the warning via **`#pragma warning disable WPF0001`**.

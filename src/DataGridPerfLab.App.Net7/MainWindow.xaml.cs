@@ -43,36 +43,44 @@ public partial class MainWindow : Window
         UpdateStatus();
     }
 
-    
-private void ApplyVirtualizationSettings()
-{
-    var on = VirtualizationToggle?.IsChecked == true;
-    if (Grid == null) return;
+    private void ApplyVirtualizationSettings()
+    {
+        var on = VirtualizationToggle?.IsChecked == true;
+        if (Grid == null) return;
 
-    // DataGrid-level toggles (safe to change at runtime)
-    Grid.EnableRowVirtualization = on;
-    Grid.EnableColumnVirtualization = on;
+        // DataGrid-level toggles (safe to change at runtime)
+        Grid.EnableRowVirtualization = on;
+        Grid.EnableColumnVirtualization = on;
 
-    // Panel-level virtualization toggle (safe). IMPORTANT:
-    // Do NOT change VirtualizationMode (Recycling/Standard) after the panel has been measured,
-    // otherwise WPF throws InvalidOperationException.
-    VirtualizingPanel.SetIsVirtualizing(Grid, on);
+        // Panel-level virtualization toggle (safe). IMPORTANT:
+        // Do NOT change VirtualizationMode (Recycling/Standard) after the panel has been measured,
+        // otherwise WPF throws InvalidOperationException.
+        VirtualizingPanel.SetIsVirtualizing(Grid, on);
 
-    // Keep VirtualizationMode fixed (set in XAML). We only toggle virtualization on/off.
-    // Keep logical scrolling for consistency.
-    Grid.SetValue(ScrollViewer.CanContentScrollProperty, true);
+        // Keep VirtualizationMode fixed (set in XAML). We only toggle virtualization on/off.
+        Grid.SetValue(ScrollViewer.CanContentScrollProperty, true);
 
-    // Optional: force re-measure after toggle (helps UI reflect change quickly)
-    Grid.InvalidateMeasure();
-    Grid.InvalidateArrange();
-}
+        // Help UI reflect change quickly
+        Grid.InvalidateMeasure();
+        Grid.InvalidateArrange();
+    }
+
+    private void OnThemeChanged(object sender, RoutedEventArgs e)
+    {
+#if NET9_0_OR_GREATER
+#pragma warning disable WPF0001 // ThemeMode is preview by design
+        this.ThemeMode = FluentThemeToggle.IsChecked == true ? ThemeMode.System : ThemeMode.None;
+#pragma warning restore WPF0001
+#else
+        // Older TFMs: no ThemeMode API.
+        if (StatusText != null) StatusText.Text = "Fluent Theme は .NET 9+ で有効です";
+#endif
+        UpdateStatus();
+    }
 
     private void OnRebuild(object sender, RoutedEventArgs e)
     {
         var batch = BatchToggle.IsChecked == true;
-
-        var buildMode = (BuildMode)(BuildModeCombo?.SelectedIndex ?? 0);
-
         var buildMode = (BuildMode)(BuildModeCombo?.SelectedIndex ?? 0);
 
         var allocBefore = GetAllocatedBytes();
@@ -175,9 +183,9 @@ private void ApplyVirtualizationSettings()
             // Live Shaping (only works on ListCollectionView / BindingListCollectionView)
             if (view is ICollectionViewLiveShaping liveView)
             {
-                liveView.IsLiveFiltering = live && (filterScore); // even-id filter won't change dynamically
-                liveView.IsLiveSorting = live && (sortScoreDesc);
-                liveView.IsLiveGrouping = live && (groupByCategory);
+                liveView.IsLiveFiltering = live && filterScore; // even-id filter won't change dynamically
+                liveView.IsLiveSorting = live && sortScoreDesc;
+                liveView.IsLiveGrouping = live && groupByCategory;
 
                 // Properties that should trigger live updates
                 liveView.LiveFilteringProperties.Clear();
@@ -208,6 +216,8 @@ private void ApplyVirtualizationSettings()
     private void UpdateStatus()
     {
         var batch = BatchToggle?.IsChecked == true;
+        var buildMode = (BuildMode)(BuildModeCombo?.SelectedIndex ?? 0);
+
         var filterEven = FilterEvenToggle?.IsChecked == true;
         var filterScore = FilterScoreToggle?.IsChecked == true;
         var sortIdDesc = SortIdDescToggle?.IsChecked == true;
@@ -216,19 +226,20 @@ private void ApplyVirtualizationSettings()
         var defer = UseDeferRefreshToggle?.IsChecked == true;
         var live = LiveShapingToggle?.IsChecked == true;
         var virt = VirtualizationToggle?.IsChecked == true;
-        var buildMode = (BuildMode)(BuildModeCombo?.SelectedIndex ?? 0);
+        var fluent = FluentThemeToggle?.IsChecked == true;
 
         var mode =
             $"Virt={(virt ? "ON" : "OFF")}, " +
             $"BuildMode={buildMode}, " +
-                        $"Batch={(batch ? "ON" : "OFF")}, " +
+            $"Batch={(batch ? "ON" : "OFF")}, " +
             $"FilterEven={(filterEven ? "ON" : "OFF")}, " +
             $"FilterScore={(filterScore ? "ON" : "OFF")}, " +
             $"SortIdDesc={(sortIdDesc ? "ON" : "OFF")}, " +
             $"SortScoreDesc={(sortScoreDesc ? "ON" : "OFF")}, " +
             $"Group={(group ? "ON" : "OFF")}, " +
             $"DeferRefresh={(defer ? "ON" : "OFF")}, " +
-            $"LiveShaping={(live ? "ON" : "OFF")}";
+            $"LiveShaping={(live ? "ON" : "OFF")}, " +
+            $"FluentTheme={(fluent ? "ON" : "OFF")}";
 
         var text =
             $"Rebuild(100k): {_vm.LastLoadMs} ms (alloc {_lastRebuildAllocBytes:N0} B) | " +
@@ -242,7 +253,5 @@ private void ApplyVirtualizationSettings()
     }
 
     private static long GetAllocatedBytes()
-    {
-        return GC.GetTotalAllocatedBytes(precise: false);
-    }
+        => GC.GetTotalAllocatedBytes(precise: false);
 }
