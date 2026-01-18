@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace DataGridPerfLab.Shared;
 
@@ -28,46 +32,79 @@ public sealed class MainViewModel : INotifyPropertyChanged
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
     /// <summary>
-    /// Rebuilds the data. When <paramref name="batchReplaceItemsSource"/> is true, it creates a new collection
-    /// and replaces Items (ItemsSource replacement). This is the safest way to batch-update WPF DataGrid.
-    /// When false, it clears and adds into the existing ObservableCollection (many CollectionChanged events).
+    /// Rebuilds the data.
+    /// - batchReplaceItemsSource=true  : builds a new collection and replaces Items (recommended).
+    /// - batchReplaceItemsSource=false : clears and adds into the existing collection (many CollectionChanged events).
+    /// - parallelBuild=true            : generates items in parallel using System.Collections.Concurrent.
     /// </summary>
-    public void Rebuild(int count, bool batchReplaceItemsSource)
+    public void Rebuild(int count, bool batchReplaceItemsSource, bool parallelBuild)
     {
         var sw = Stopwatch.StartNew();
-        var rnd = new Random(0);
+
+        // Build data first (CPU work). Then apply to ObservableCollection (UI-friendly).
+        List<Item> built = parallelBuild ? BuildItemsParallel(count) : BuildItemsSequential(count);
 
         if (batchReplaceItemsSource)
         {
-            var newItems = new ObservableCollection<Item>();
-            for (int i = 0; i < count; i++)
-            {
-                newItems.Add(new Item
-                {
-                    Id = i,
-                    Name = "Item " + i,
-                    Score = rnd.Next(0, 100)
-                });
-            }
-            Items = newItems;
+            Items = new ObservableCollection<Item>(built);
         }
         else
         {
             Items.Clear();
-            for (int i = 0; i < count; i++)
-            {
-                Items.Add(new Item
-                {
-                    Id = i,
-                    Name = "Item " + i,
-                    Score = rnd.Next(0, 100)
-                });
-            }
+            for (int i = 0; i < built.Count; i++)
+                Items.Add(built[i]);
         }
 
         sw.Stop();
         LastLoadMs = sw.ElapsedMilliseconds;
         OnPropertyChanged(nameof(LastLoadMs));
+    }
+
+    private static List<Item> BuildItemsSequential(int count)
+    {
+        var rnd = new Random(0);
+        var list = new List<Item>(capacity: count);
+        for (int i = 0; i < count; i++)
+        {
+            list.Add(new Item
+            {
+                Id = i,
+                Name = "Item " + i,
+                Score = rnd.Next(0, 100)
+            });
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// Parallel generation demo using System.Collections.Concurrent.
+    /// NOTE: For maximum speed, an array indexed by i is usually faster than a concurrent collection.
+    /// Here we intentionally use a concurrent collection because the lab is about comparing strategies.
+    /// </summary>
+    private static List<Item> BuildItemsParallel(int count)
+    {
+        var bag = new ConcurrentBag<Item>();
+
+        // Each thread gets its own Random to avoid contention.
+        var rng = new ThreadLocal<Random>(() => new Random(Guid.NewGuid().GetHashCode()));
+
+        System.Threading.Tasks.Parallel.For(0, count, i =>
+        {
+            var r = rng.Value!;
+            bag.Add(new Item
+            {
+                Id = i,
+                Name = "Item " + i,
+                Score = r.Next(0, 100)
+            });
+        });
+
+        rng.Dispose();
+
+        // ConcurrentBag is unordered; sort by Id for stable behavior
+        var list = bag.ToList();
+        list.Sort(static (a, b) => a.Id.CompareTo(b.Id));
+        return list;
     }
 
     /// <summary>

@@ -71,9 +71,11 @@ private void ApplyVirtualizationSettings()
     {
         var batch = BatchToggle.IsChecked == true;
 
+        var parallel = ParallelBuildToggle.IsChecked == true;
+
         var allocBefore = GetAllocatedBytes();
 
-        _vm.Rebuild(100_000, batch);
+        _vm.Rebuild(100_000, batch, parallel);
 
         var allocAfter = GetAllocatedBytes();
         _lastRebuildAllocBytes = allocAfter - allocBefore;
@@ -212,9 +214,11 @@ private void ApplyVirtualizationSettings()
         var defer = UseDeferRefreshToggle?.IsChecked == true;
         var live = LiveShapingToggle?.IsChecked == true;
         var virt = VirtualizationToggle?.IsChecked == true;
+        var parallel = ParallelBuildToggle?.IsChecked == true;
 
         var mode =
             $"Virt={(virt ? "ON" : "OFF")}, " +
+            $"Parallel={(parallel ? "ON" : "OFF")}, " +
             $"Batch={(batch ? "ON" : "OFF")}, " +
             $"FilterEven={(filterEven ? "ON" : "OFF")}, " +
             $"FilterScore={(filterScore ? "ON" : "OFF")}, " +

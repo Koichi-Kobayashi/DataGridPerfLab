@@ -24,6 +24,10 @@
                               Content="ItemsSource をまとめて差し替え（高速）"
                               IsChecked="True" Margin="0,0,18,0"/>
 
+                    <CheckBox x:Name="ParallelBuildToggle"
+                              Content="並列生成（System.Collections.Concurrent）"
+                              IsChecked="False" Margin="0,0,18,0"/>
+
                     <Separator Width="10"/>
 
                     <CheckBox x:Name="FilterEvenToggle"
