@@ -60,3 +60,15 @@ This project demonstrates how different features affect performance and allocati
 
 This lab confirms that **DataGrid performance is dominated by correct usage patterns**, not just runtime version.
 Virtualization, ItemsSource replacement, and DeferRefresh provide far greater gains than upgrading .NET alone.
+
+---
+
+## Build Mode
+
+For comparing data generation strategies (CPU work), you can switch between:
+
+- **Sequential**: single-thread generation
+- **Parallel (ConcurrentBag)**: uses `System.Collections.Concurrent.ConcurrentBag` (unordered, then sorted by Id)
+- **Parallel (Array)**: writes into an indexed `Item[]` (often faster than concurrent collections)
+
+Note: DataGrid rendering is dominated by UI-thread work; this primarily compares generation cost.

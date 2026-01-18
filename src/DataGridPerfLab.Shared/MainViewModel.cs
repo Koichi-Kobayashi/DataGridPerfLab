@@ -35,14 +35,19 @@ public sealed class MainViewModel : INotifyPropertyChanged
     /// Rebuilds the data.
     /// - batchReplaceItemsSource=true  : builds a new collection and replaces Items (recommended).
     /// - batchReplaceItemsSource=false : clears and adds into the existing collection (many CollectionChanged events).
-    /// - parallelBuild=true            : generates items in parallel using System.Collections.Concurrent.
+    /// - buildMode                     : how to generate items (sequential / parallel strategies).
     /// </summary>
-    public void Rebuild(int count, bool batchReplaceItemsSource, bool parallelBuild)
+    public void Rebuild(int count, bool batchReplaceItemsSource, BuildMode buildMode)
     {
         var sw = Stopwatch.StartNew();
 
         // Build data first (CPU work). Then apply to ObservableCollection (UI-friendly).
-        List<Item> built = parallelBuild ? BuildItemsParallel(count) : BuildItemsSequential(count);
+        List<Item> built = buildMode switch
+        {
+            BuildMode.ParallelConcurrentBag => BuildItemsParallelConcurrentBag(count),
+            BuildMode.ParallelArray => BuildItemsParallelArray(count),
+            _ => BuildItemsSequential(count),
+        };
 
         if (batchReplaceItemsSource)
         {
@@ -77,11 +82,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Parallel generation demo using System.Collections.Concurrent.
-    /// NOTE: For maximum speed, an array indexed by i is usually faster than a concurrent collection.
-    /// Here we intentionally use a concurrent collection because the lab is about comparing strategies.
+    /// Parallel generation demo using System.Collections.Concurrent.ConcurrentBag.
+    /// NOTE: This is NOT always the fastest approach (unordered + ToList + Sort).
+    /// It's included because it's a canonical example of "concurrent collection" usage.
     /// </summary>
-    private static List<Item> BuildItemsParallel(int count)
+    private static List<Item> BuildItemsParallelConcurrentBag(int count)
     {
         var bag = new ConcurrentBag<Item>();
 
@@ -101,10 +106,37 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         rng.Dispose();
 
-        // ConcurrentBag is unordered; sort by Id for stable behavior
+        // ConcurrentBag is unordered; sort by Id for stable UI behavior
         var list = bag.ToList();
         list.Sort(static (a, b) => a.Id.CompareTo(b.Id));
         return list;
+    }
+
+    /// <summary>
+    /// Parallel generation using an indexed array (often faster than concurrent collections).
+    /// This avoids shared-collection contention and keeps the result ordered by Id.
+    /// </summary>
+    private static List<Item> BuildItemsParallelArray(int count)
+    {
+        var arr = new Item[count];
+
+        var rng = new ThreadLocal<Random>(() => new Random(Guid.NewGuid().GetHashCode()));
+
+        System.Threading.Tasks.Parallel.For(0, count, i =>
+        {
+            var r = rng.Value!;
+            arr[i] = new Item
+            {
+                Id = i,
+                Name = "Item " + i,
+                Score = r.Next(0, 100)
+            };
+        });
+
+        rng.Dispose();
+
+        // Already ordered by i
+        return new List<Item>(arr);
     }
 
     /// <summary>

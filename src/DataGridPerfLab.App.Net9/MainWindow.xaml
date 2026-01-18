@@ -24,9 +24,15 @@
                               Content="ItemsSource をまとめて差し替え（高速）"
                               IsChecked="True" Margin="0,0,18,0"/>
 
-                    <CheckBox x:Name="ParallelBuildToggle"
-                              Content="並列生成（System.Collections.Concurrent）"
-                              IsChecked="False" Margin="0,0,18,0"/>
+
+<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,18,0">
+    <TextBlock VerticalAlignment="Center" Text="生成方式：" Margin="0,0,6,0"/>
+    <ComboBox x:Name="BuildModeCombo" Width="220" SelectedIndex="0">
+        <ComboBoxItem Content="逐次 (Sequential)"/>
+        <ComboBoxItem Content="並列 (ConcurrentBag)"/>
+        <ComboBoxItem Content="並列 (Array)"/>
+    </ComboBox>
+</StackPanel>
 
                     <Separator Width="10"/>
 

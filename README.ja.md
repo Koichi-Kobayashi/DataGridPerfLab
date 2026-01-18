@@ -52,3 +52,22 @@
 WPF DataGrid の性能は **ランタイムの新旧よりも使い方が支配的**です。
 仮想化・ItemsSource 差し替え・DeferRefresh を正しく使うことが、
 .NET のバージョンアップ以上に効果を発揮します。
+
+---
+
+## 並列生成（System.Collections.Concurrent）
+
+UI 更新を速くするというより、**UI に渡す前のデータ生成（CPU作業）**を並列化するためのトグルです。生成後は ItemsSource を一括差し替えするのが基本です。
+
+
+---
+
+## 生成方式（BuildMode）
+
+データ生成（CPU作業）部分の比較用に、以下の 3 パターンを切り替えできます。
+
+- **逐次 (Sequential)**: 1スレッドで生成
+- **並列 (ConcurrentBag)**: `System.Collections.Concurrent.ConcurrentBag` に並列で追加（順序が崩れるため最後にソート）
+- **並列 (Array)**: `Item[]` に index で書き込む方式（共有コレクションが無く、並列生成としては速いことが多い）
+
+※ DataGrid の描画は UI スレッドが支配的なので、これは主に「生成コストの比較」です。UI 反映は ItemsSource 差し替えが基本です。
