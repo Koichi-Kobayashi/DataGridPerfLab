@@ -81,13 +81,13 @@ UI 更新を速くするというより、**UI に渡す前のデータ生成（
 このラボに追加した “バージョン固有” の比較ポイントは次のとおりです。
 
 - **.NET 9+（WPF）: ThemeMode / Fluent Theme**
-  - `Window.ThemeMode` / `Application.ThemeMode` により、Fluent テーマを **ResourceDictionary を直接マージせず**に有効化できます。 citeturn3search1turn3search4
+  - `Window.ThemeMode` / `Application.ThemeMode` により、Fluent テーマを **ResourceDictionary を直接マージせず**に有効化できます。
 - **.NET 9+（Runtime）: System.Threading.Lock**
-  - 従来の `lock(object)` の代替として `System.Threading.Lock` が追加されました。ラボでは「並列 (List+Lock)」で、.NET 9+ のときだけ `Lock.EnterScope()` を使う実装にしています。 citeturn3search0turn3search2turn3search12
+  - 従来の `lock(object)` の代替として `System.Threading.Lock` が追加されました。ラボでは「並列 (List+Lock)」で、.NET 9+ のときだけ `Lock.EnterScope()` を使う実装にしています。
 - **.NET 7（WPF）: 内部最適化の積み重ね**
-  - boxing/unboxing や割り当て削減など、WPF 全体でパフォーマンス改善が継続的に入りました（DataGridも恩恵を受けます）。 citeturn0search0turn0search7
+  - boxing/unboxing や割り当て削減など、WPF 全体でパフォーマンス改善が継続的に入りました（DataGridも恩恵を受けます）。
 - **.NET 10（WPF）: UIA/ダイアログ/描画まわりの内部改善**
-  - UI Automation やファイルダイアログ、ピクセル変換など内部最適化が進んでいます。DataGrid 直接ではないですが、アプリ全体の “もっさり” を減らす方向の改善です。 citeturn0search3
+  - UI Automation やファイルダイアログ、ピクセル変換など内部最適化が進んでいます。DataGrid 直接ではないですが、アプリ全体の “もっさり” を減らす方向の改善です。
 
 > 注: DataGrid の体感速度は **仮想化・ItemsSource差し替え・DeferRefresh** の影響が支配的です。  
 > バージョン差は「同じ実装でも少しずつ良くなる」枠として見るのが分かりやすいです。

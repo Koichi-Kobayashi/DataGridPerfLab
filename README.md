@@ -82,13 +82,13 @@ Note: DataGrid rendering is dominated by UI-thread work; this primarily compares
 This lab includes a few intentionally **version-specific** switches you can compare across TFMs:
 
 - **.NET 9+ (WPF): ThemeMode / Fluent Theme**
-  - `Window.ThemeMode` / `Application.ThemeMode` lets you enable the Fluent theme without manually merging resource dictionaries. citeturn3search1turn3search4
+  - `Window.ThemeMode` / `Application.ThemeMode` lets you enable the Fluent theme without manually merging resource dictionaries.
 - **.NET 9+ (Runtime): System.Threading.Lock**
-  - .NET 9 introduces `System.Threading.Lock` as a modern synchronization primitive. The lab’s “Parallel (List+Lock)” build mode uses `Lock.EnterScope()` on .NET 9+ and falls back to `lock(object)` on older TFMs. citeturn3search2turn3search12
+  - .NET 9 introduces `System.Threading.Lock` as a modern synchronization primitive. The lab’s “Parallel (List+Lock)” build mode uses `Lock.EnterScope()` on .NET 9+ and falls back to `lock(object)` on older TFMs.
 - **.NET 7 (WPF): ongoing perf work**
-  - WPF in .NET 7 shipped with a broad set of performance improvements (allocations/boxing reductions, etc.). citeturn0search0turn0search7
+  - WPF in .NET 7 shipped with a broad set of performance improvements (allocations/boxing reductions, etc.).
 - **.NET 10 (WPF): internal perf improvements**
-  - WPF in .NET 10 mentions internal optimizations (UI automation, dialogs, pixel conversions, caches, etc.). citeturn0search3
+  - WPF in .NET 10 mentions internal optimizations (UI automation, dialogs, pixel conversions, caches, etc.).
 
 Note: DataGrid responsiveness is still dominated by **virtualization, ItemsSource replacement, and DeferRefresh**. Version upgrades tend to deliver incremental gains on top of correct usage patterns.
 
