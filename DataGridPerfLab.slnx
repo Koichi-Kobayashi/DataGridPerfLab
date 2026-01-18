@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/DataGridPerfLab.App.Net10/DataGridPerfLab.App.Net10.csproj" />
+  <Project Path="src/DataGridPerfLab.App.Net6/DataGridPerfLab.App.Net6.csproj" />
+  <Project Path="src/DataGridPerfLab.App.Net7/DataGridPerfLab.App.Net7.csproj" />
+  <Project Path="src/DataGridPerfLab.App.Net8/DataGridPerfLab.App.Net8.csproj" />
+  <Project Path="src/DataGridPerfLab.App.Net9/DataGridPerfLab.App.Net9.csproj" />
+  <Project Path="src/DataGridPerfLab.Shared/DataGridPerfLab.Shared.csproj" />
+</Solution>
