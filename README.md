@@ -1,3 +1,5 @@
+[English](README.md) | [日本語](README.ja.md)
+
 # DataGridPerfLab
 
 A WPF performance comparison lab for **DataGrid** across **.NET 6 – .NET 10**.
