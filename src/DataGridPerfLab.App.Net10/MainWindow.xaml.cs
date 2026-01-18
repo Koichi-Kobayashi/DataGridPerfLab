@@ -73,8 +73,6 @@ private void ApplyVirtualizationSettings()
 
         var buildMode = (BuildMode)(BuildModeCombo?.SelectedIndex ?? 0);
 
-        var buildMode = (BuildMode)(BuildModeCombo?.SelectedIndex ?? 0);
-
         var allocBefore = GetAllocatedBytes();
 
         _vm.Rebuild(100_000, batch, buildMode);
