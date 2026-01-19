@@ -15,6 +15,18 @@ This project demonstrates how different features affect performance and allocati
 
 ---
 
+## Test Environment
+
+- OS: Windows 11 Pro 26H1
+- CPU: AMD Ryzen 7 5700U with Radeon Graphics (1.80 GHz)
+- RAM: 32 GB
+- UI Framework: WPF / DataGrid
+- Target Runtimes: .NET 6 / 7 / 8 / 9 / 10
+- Dataset Size: 100,000 rows
+- Build Configuration: Release
+
+---
+
 ## 📊 Results Summary
 
 ### 1. Feature Impact Overview
