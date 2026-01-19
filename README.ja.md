@@ -4,6 +4,27 @@
 
 **.NET 6 ～ .NET 10** における **WPF DataGrid の性能比較ラボ**です。
 
+このプロジェクトでは、さまざまな機能が パフォーマンスおよび メモリ割り当て量（アロケーション） にどのような影響を与えるかを検証します。
+
+- ItemsSource の差し替え と Clear / Add の比較
+- フィルター / ソート / グループ化
+- DeferRefresh（View 変更の一括反映）
+- LiveShaping（ライブ フィルター / ソート / グループ）
+- 行・列の仮想化
+- メモリ割り当て量の計測
+
+---
+
+## 検証環境
+
+- OS: Windows 11 Pro 26H1
+- CPU: AMD Ryzen 7 5700U with Radeon Graphics (1.80 GHz)
+- RAM: 32GB
+- UI: WPF / DataGrid
+- 対象ランタイム: .NET 6 / 7 / 8 / 9 / 10
+- データ件数: 100,000 行
+- Release ビルド
+
 ---
 
 ## 📊 結果まとめ
